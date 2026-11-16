@@ -431,6 +431,11 @@ details summary:hover { color: var(--fg); }
         <defs id="defs"></defs><defs id="galDefs"></defs>
         <g id="scene"><g id="galLayer" class="layer"></g><g id="sysLayer" class="layer off"><g id="links"></g><g id="ring"></g><g id="nodes"></g><g id="subs"></g></g></g>
       </svg>
+      <div class="hint-center" id="cosmosEmpty" hidden>
+        <h2>Seu universo ainda está vazio</h2>
+        <p>Comece por uma aula, um texto ou um vídeo. O Claude cria as matérias, os temas e os subtópicos a partir do que você estudar.</p>
+        <div class="row" style="justify-content:center"><button type="button" class="btn primary" id="ceAdd">Adicionar fonte</button><button type="button" class="btn" id="ceLive"><span class="recdot"></span>Iniciar aula</button><button type="button" class="btn ghost" id="ceNew">Criar matéria</button></div>
+      </div>
       <div class="hint-center" id="mapEmpty" hidden>
         <h2>Esta disciplina ainda não tem mapa</h2>
         <p>Cole o programa do módulo ou a lista de leituras e o Claude organiza os temas, os subtópicos e as conexões entre eles.</p>
@@ -502,7 +507,7 @@ details summary:hover { color: var(--fg); }
     <div class="dlg-top"><h2 id="genTitle">Gerar mapa</h2><button type="button" class="iconbtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <p class="sub">Cole o programa do módulo, a lista de leituras ou anotações de aula. O Claude identifica os temas, os subtópicos e como eles se conectam.</p>
     <label class="field" for="genFile">Arquivos (.pdf, .txt, .md)<input id="genFile" type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" multiple></label>
-    <label class="field" for="genText">Material<textarea id="genText" class="tall" placeholder="Week 1 – Anthropomorphism. Reading: Epley, Waytz & Cacioppo (2007)…"></textarea></label>
+    <label class="field" for="genText">Material<textarea id="genText" class="tall" placeholder="Semana 1 – Introdução. Leitura: …"></textarea></label>
     <div id="genConfirm"></div>
     <div class="dialog-actions"><span class="status" id="genStatus"></span><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" class="btn primary" id="genRun" data-ai>Gerar mapa</button></div>
   </div>
@@ -574,7 +579,7 @@ details summary:hover { color: var(--fg); }
 (() => {
 "use strict";
 /* ============ Utilities ============ */
-const KEY = "orbita-psi-v1";
+const KEY = "orbita-v1";
 const DAY = 86400000;
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -681,64 +686,10 @@ async function filesToText(files, statusEl) {
 
 /* ============ Data ============ */
 function exampleDiscipline() {
-  const S = (name, sources) => ({ id: slug(name), name, sources: sources.map(([type, title]) => ({ type, title })) });
-  return {
-    id: "psico-social", subject: "Psicologia Social", isExample: false, instructions: "", material: "", cards: [], articles: [],
-    themes: [
-      { id: "anthro", name: "Anthropomorphism", desc: "Por que atribuímos mente, intenções e emoções humanas a animais, máquinas, deuses e objetos.", volume: 8, subs: [
-        S("Three-factor theory (SEEK)", [["artigo", "Epley, Waytz & Cacioppo (2007), On seeing human, Psychological Review"]]),
-        S("Elicited agent knowledge", [["artigo", "Epley, Waytz & Cacioppo (2007), On seeing human"]]),
-        S("Effectance motivation", [["artigo", "Waytz et al. (2010), Making sense by making sentient, JPSP"]]),
-        S("Sociality and loneliness", [["artigo", "Epley, Akalis, Waytz & Cacioppo (2008), Creating social connection through inferential reproduction, Psychological Science"]]),
-        S("Individual differences (IDAQ)", [["artigo", "Waytz, Cacioppo & Epley (2010), Who sees human?, Perspectives on Psychological Science"]]),
-        S("Machines, AI and trust", [["artigo", "Waytz, Heafner & Epley (2014), The mind in the machine, JESP"], ["artigo", "Nass & Moon (2000), Machines and mindlessness, Journal of Social Issues"]]),
-        S("Uncanny valley", [["artigo", "Mori (1970), The uncanny valley"], ["artigo", "Gray & Wegner (2012), Feeling robots and human zombies, Cognition"]]) ] },
-      { id: "mind", name: "Mind and Morality", desc: "Como percebemos mentes (agência e experiência) e como isso decide quem julgamos e quem protegemos moralmente.", volume: 10, subs: [
-        S("Agency and experience", [["artigo", "Gray, Gray & Wegner (2007), Dimensions of mind perception, Science"]]),
-        S("Dyadic morality", [["artigo", "Gray, Young & Waytz (2012), Mind perception is the essence of morality, Psychological Inquiry"], ["artigo", "Schein & Gray (2018), The theory of dyadic morality, PSPR"]]),
-        S("Moral typecasting", [["artigo", "Gray & Wegner (2009), Moral typecasting, JPSP"]]),
-        S("Dehumanization", [["artigo", "Haslam (2006), Dehumanization: an integrative review, PSPR"]]),
-        S("The moral circle", [["artigo", "Crimston, Bain, Hornsey & Bastian (2016), Moral expansiveness, JPSP"]]),
-        S("Meat paradox", [["artigo", "Bastian, Loughnan, Haslam & Radke (2012), Don't mind meat?, PSPB"]]),
-        S("Moral foundations", [["artigo", "Haidt (2001), The emotional dog and its rational tail, Psychological Review"], ["artigo", "Graham, Haidt & Nosek (2009), JPSP"]]) ] },
-      { id: "conspiracy", name: "Understanding Conspiracy Theories and Misinformation", desc: "Por que pessoas acreditam em conspirações e informações falsas, e o que de fato reduz essa crença.", volume: 11, subs: [
-        S("Epistemic, existential and social motives", [["artigo", "Douglas, Sutton & Cichocka (2017), The psychology of conspiracy theories, Current Directions"]]),
-        S("Conspiracy mentality", [["artigo", "Goertzel (1994), Belief in conspiracy theories, Political Psychology"], ["artigo", "Imhoff & Bruder (2014), European Journal of Personality"], ["artigo", "Wood, Douglas & Sutton (2012), Dead and alive, SPPS"]]),
-        S("Agency detection", [["artigo", "Douglas et al. (2016), Someone is pulling the strings, Thinking & Reasoning"]]),
-        S("Lazy vs. motivated reasoning", [["artigo", "Pennycook & Rand (2019), Lazy, not biased, Cognition"]]),
-        S("Illusory truth effect", [["artigo", "Hasher, Goldstein & Toppino (1977)"], ["artigo", "Fazio et al. (2015), Knowledge does not protect against illusory truth, JEP: General"]]),
-        S("Spread of false news", [["artigo", "Vosoughi, Roy & Aral (2018), The spread of true and false news online, Science"]]),
-        S("Debunking and continued influence", [["artigo", "Lewandowsky et al. (2012), Misinformation and its correction, PSPI"], ["artigo", "Ecker et al. (2022), Nature Reviews Psychology"]]),
-        S("Prebunking and inoculation", [["artigo", "van der Linden et al. (2017), Inoculating the public against misinformation about climate change, Global Challenges"], ["artigo", "Roozenbeek & van der Linden (2019), Fake news game, Palgrave Communications"]]) ] },
-      { id: "defiance", name: "Defiance, Reactance and Procedural Justice", desc: "Três teorias ligadas: quando regras e autoridades geram obediência, rebeldia ou desafio, e por que o modo de tratar as pessoas pesa tanto quanto a punição.", volume: 11, subs: [
-        S("Psychological reactance", [["livro", "Brehm (1966), A theory of psychological reactance"], ["livro", "Brehm & Brehm (1981), Psychological reactance"]]),
-        S("Reactance: anger and cognitions", [["artigo", "Dillard & Shen (2005), On the nature of reactance, Communication Monographs"], ["artigo", "Hong & Faedda (1996), Hong Psychological Reactance Scale"]]),
-        S("Controlling language in messages", [["artigo", "Miller et al. (2007), Psychological reactance and promotional health messages, Human Communication Research"]]),
-        S("Defiance theory", [["artigo", "Sherman (1993), Defiance, deterrence, and irrelevance, Journal of Research in Crime and Delinquency"]]),
-        S("Shame and reintegration", [["livro", "Braithwaite (1989), Crime, Shame and Reintegration"]]),
-        S("Procedural justice", [["livro", "Thibaut & Walker (1975), Procedural Justice"], ["livro", "Lind & Tyler (1988), The social psychology of procedural justice"]]),
-        S("Legitimacy and compliance", [["livro", "Tyler (1990), Why People Obey the Law"], ["artigo", "Sunshine & Tyler (2003), Law & Society Review"]]),
-        S("Group engagement model", [["artigo", "Tyler & Blader (2003), PSPR"], ["artigo", "Mazerolle et al. (2013), Queensland Community Engagement Trial, Criminology"]]) ] },
-      { id: "prejudice", name: "Prejudice and Intergroup Relations", desc: "Como surgem estereótipos, preconceito e conflito entre grupos, e o que comprovadamente os reduz.", volume: 12, subs: [
-        S("Social identity theory", [["livro", "Tajfel & Turner (1979), An integrative theory of intergroup conflict"], ["artigo", "Tajfel et al. (1971), minimal group paradigm, EJSP"]]),
-        S("Realistic conflict", [["livro", "Sherif et al. (1961), Robbers Cave experiment"]]),
-        S("Stereotype content model", [["artigo", "Fiske, Cuddy, Glick & Xu (2002), JPSP"]]),
-        S("Implicit bias", [["artigo", "Greenwald, McGhee & Schwartz (1998), the IAT, JPSP"], ["artigo", "Forscher et al. (2019), meta-analysis of implicit measures, JPSP"]]),
-        S("Infrahumanization", [["artigo", "Leyens et al. (2000), PSPR"]]),
-        S("Stereotype threat", [["artigo", "Steele & Aronson (1995), JPSP"]]),
-        S("Intergroup contact", [["livro", "Allport (1954), The Nature of Prejudice"], ["artigo", "Pettigrew & Tropp (2006), meta-analysis, JPSP"]]),
-        S("Common ingroup identity", [["livro", "Gaertner & Dovidio (2000), Reducing intergroup bias"]]) ] }
-    ],
-    links: [
-      { a: "mind", b: "anthro", type: "pre", strength: 3, label: "percepção de mente" },
-      { a: "mind", b: "prejudice", type: "rel", strength: 3, label: "desumanização" },
-      { a: "anthro", b: "conspiracy", type: "rel", strength: 2, label: "detectar agentes" },
-      { a: "conspiracy", b: "defiance", type: "rel", strength: 2, label: "desconfiança da autoridade" },
-      { a: "conspiracy", b: "prejudice", type: "rel", strength: 2, label: "ameaça entre grupos" },
-      { a: "defiance", b: "prejudice", type: "rel", strength: 1, label: "identidade de grupo" }
-    ]
-  };
+  // App começa vazio: um "espaço" invisível que só existe até o primeiro conteúdo virar uma matéria de verdade.
+  return { id: "inicio", subject: "Sem matéria", placeholder: true, isExample: false, instructions: "", material: "", cards: [], sources: [], ignoredRefs: [], themes: [], links: [] };
 }
+const isGhost = (d) => !!(d && d.placeholder && !d.themes.length && !(d.sources || []).length);
 const SRC_KIND = { aula: "Aula", livro: "Leitura", artigo: "Artigo", anotacao: "Anotação" };
 const SRC_ORIGIN = { material: "seu material", claude: "conhecimento geral do Claude" };
 function exampleSources() {
@@ -796,7 +747,7 @@ let saveWarned = false;
 let db = null, viewerId = null, cloud = "local";
 const pendingWrites = new Map();
 let flushTimer = null, flushing = false;
-const userRoot = () => db.doc(`data/users/${viewerId}/orbita-psi`);
+const userRoot = () => db.doc(`data/users/${viewerId}/orbita`);
 const discRef = (id) => userRoot().collection("disc").doc(id);
 const srcRef = (did, sid) => discRef(did).collection("sources").doc(sid);
 const plain = (o) => JSON.parse(JSON.stringify(o));
@@ -928,7 +879,7 @@ function retrieve(q, k = 5) {
 const langLine = () => lang === "en" ? "Write in English (UK academic register)." : "Escreva em português do Brasil e mantenha entre parênteses o termo técnico em inglês usado no curso.";
 let lastCited = [];
 function ctx(q, lite) {
-  const parts = [`CONTEXTO: a usuária é estudante de graduação em psicologia comportamental na UCL, em Londres. Disciplina ativa: ${state.subject}.`];
+  const parts = [`CONTEXTO: você ajuda um estudante a aprender a partir do material dele. ${isGhost(state) ? "Ainda não há matéria definida." : `Matéria ativa: ${state.subject}.`}`];
   if (state.instructions.trim()) parts.push(`Instruções fixas da estudante para esta disciplina (siga-as): ${state.instructions.trim()}`);
   if (state.themes.length) parts.push(`Temas do curso: ${state.themes.map((t) => t.name).join("; ")}.`);
   lastCited = [];
@@ -1125,6 +1076,7 @@ function buildDefs() {
 
 function layoutUniverse() {
   $("#mapEmpty").hidden = cosmos || state.themes.length > 0;
+  if (!cosmos) $("#cosmosEmpty").hidden = true;
   W = svg.clientWidth; H = svg.clientHeight;
   if (!W || !H || !state.themes.length) return;
   const base = Math.min(W, H), small = W < 640;
@@ -1377,7 +1329,9 @@ function renderCosmos() {
   if (!W || !H) return;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   galLayer.textContent = ""; galDefs.textContent = ""; galPos.clear();
-  const list = store.list, items = list.length + 1;
+  const list = store.list.filter((d) => !isGhost(d)), empty = !list.length, items = empty ? 0 : list.length + 1;
+  $("#cosmosEmpty").hidden = !empty;
+  if (empty) return;
   const top = 76, bottom = 104, ah = Math.max(220, H - top - bottom);
   let best = null;
   for (let c = 1; c <= items; c++) {
@@ -1490,7 +1444,7 @@ function goCosmos() {
   cosmos = true; renderHeader();
   applyView();
   zoomLayers("out", galPos.get(state.id) || { x: svg.clientWidth / 2, y: svg.clientHeight / 2 });
-  setTimeout(() => { const i = store.list.indexOf(state); const el = $$(".gal", galLayer)[i]; if (el) el.focus({ preventScroll: true }); }, 60);
+  setTimeout(() => { const i = store.list.filter((d) => !isGhost(d)).indexOf(state); const el = $$(".gal", galLayer)[i]; if (el) el.focus({ preventScroll: true }); }, 60);
 }
 function newGalaxy() {
   const d = blankDiscipline("Nova matéria"); store.list.push(d);
@@ -1701,7 +1655,7 @@ const STYLES = {
 const SOURCE_STYLES = { explicar: "Perguntar", questionar: "Me questionar" };
 function rulesFor(style, T, seed) {
   const head = `${ctx(T.q + " " + (seed || ""))}${T.extra}\n\nASSUNTO EM FOCO: ${T.label}.\n`;
-  if (style === "explicar") return head + `Você é tutor de psicologia comportamental, incluindo estatística e métodos de pesquisa. Responda ao que ela perguntar, partindo do assunto em foco${T.src ? " e do texto da fonte (quando algo não estiver nela, diga)" : ""}.
+  if (style === "explicar") return head + `Você é tutor da matéria em foco. Responda ao que for perguntado, partindo do assunto em foco${T.src ? " e do texto da fonte (quando algo não estiver nela, diga)" : ""}.
 FORMATO OBRIGATÓRIO: no máximo 140 palavras. Comece pela resposta direta, sem introdução e sem repetir a pergunta. Use até 4 tópicos curtos quando ajudar. Um exemplo concreto quando fizer sentido. Não feche com resumo. Se o assunto pedir mais, termine com UMA oferta específica de aprofundamento ("Quer que eu aprofunde X?") em vez de escrever tudo. Tabelas só se ela pedir comparação.`;
   if (style === "questionar") return head + `Você é um tutor socrático. Nunca dê a resposta diretamente; faça UMA pergunta por vez, curta; parta do que ela já sabe; se ela errar, faça uma pergunta que revele a contradição; se ela travar duas vezes, dê uma pista pequena; quando ela chegar à resposta, confirme e resuma em até três tópicos o que ela construiu. No máximo 70 palavras por resposta.`;
   if (style === "debater") {
@@ -1712,7 +1666,7 @@ Não concorde para agradar. ${debateHard ? "Seja implacável: só reconheça um 
 As respostas serão OUVIDAS: escreva ${oral}, no máximo 100 palavras, frases curtas, sem listas, sem títulos e sem markdown. Não use marcações como [F1]; diga algo como "na sua anotação da aula…".
 Exceção: se a mensagem dela começar com ENCERRAR, saia do papel e avalie a atuação dela: 3 pontos fortes, 3 pontos a melhorar, conceitos usados de forma imprecisa e uma nota de 0 a 10 com justificativa, em tópicos curtos.`;
   }
-  if (style === "texto") return head + `Você dá feedback em textos acadêmicos de psicologia (padrão de universidade britânica). Regra: dê feedback e exemplos curtos; nunca reescreva o texto inteiro por ela. Seja objetivo: no máximo 220 palavras por resposta, em tópicos, começando pelo que tem mais impacto na nota.`;
+  if (style === "texto") return head + `Você dá feedback em textos acadêmicos (padrão universitário; siga a escala e o estilo das instruções fixas, se houver). Regra: dê feedback e exemplos curtos; nunca reescreva o texto inteiro por ela. Seja objetivo: no máximo 220 palavras por resposta, em tópicos, começando pelo que tem mais impacto na nota.`;
   return head;
 }
 const SUGG = (T) => T.src ? [
@@ -1728,7 +1682,7 @@ const SUGG = (T) => T.src ? [
   "O que costuma cair na prova sobre este tema?",
   "Qual é a maior controvérsia aqui?"
 ] : [
-  "O que as minhas fontes dizem sobre procedural justice?",
+  "O que as minhas fontes dizem sobre o tema da última aula?",
   "Quais temas do curso se conectam mais entre si?",
   "Monte um roteiro de estudo para esta semana"
 ];
@@ -1822,7 +1776,7 @@ function wireStarter(ch, T) {
       const q = $("#wPrompt").value.trim();
       const ask = { estrutura: "Avalie estrutura e argumento: a tese está clara e responde ao enunciado? progressão dos parágrafos, uso crítico de evidência, contra-argumentos, coesão. Termine com as 3 mudanças de maior impacto, em ordem.",
         ingles: "Revise o inglês acadêmico: até 10 trechos no formato original → sugestão → por quê (registro, gramática, concisão, hedging). Depois 2 padrões recorrentes. Não mexa no argumento.",
-        avaliador: "Simule um avaliador britânico: faixa estimada (First 70+, 2:1 60–69, 2:2 50–59, Third 40–49), deixando claro que é estimativa; 3 pontos fortes; 3 fraquezas; o que faria a nota subir uma faixa." }[b.dataset.w];
+        avaliador: "Simule um avaliador universitário exigente: nota estimada na escala das instruções fixas (se não houver, de 0 a 10), deixando claro que é estimativa; 3 pontos fortes; 3 fraquezas; o que faria a nota subir uma faixa." }[b.dataset.w];
       startChat(ch, T, "texto", `${q ? "Enunciado: " + q + "\n" : ""}RASCUNHO (${words(draft)} palavras):\n"""${draft.slice(0, 40000)}"""\n\n${ask}`, `${b.textContent} · rascunho de ${words(draft)} palavras`);
     }));
   }
@@ -1980,7 +1934,7 @@ async function runEssay(T) {
   $("#esAns").addEventListener("input", (e) => { $("#esCnt").textContent = words(e.target.value) + " palavras"; });
   $("#esGo").addEventListener("click", () => {
     const ans = $("#esAns").value.trim(); if (!ans) return $("#esAns").focus();
-    runAI($("#esFb"), "Correção", `${ctx(raw.pergunta)}\n\nQuestão: ${raw.pergunta}\nCritérios: ${arr(raw.criterios).join("; ")}\nResposta da estudante:\n"""${ans}"""\nCorrija como um avaliador justo de universidade britânica, de forma OBJETIVA (no máximo 200 palavras): faixa estimada (First 70+, 2:1 60–69, 2:2 50–59, Third 40–49), deixando claro que é estimativa; um tópico curto por critério; o que faltou para subir uma faixa; e um esboço de resposta nota máxima em até 4 tópicos.`);
+    runAI($("#esFb"), "Correção", `${ctx(raw.pergunta)}\n\nQuestão: ${raw.pergunta}\nCritérios: ${arr(raw.criterios).join("; ")}\nResposta da estudante:\n"""${ans}"""\nCorrija como um avaliador universitário justo, de forma OBJETIVA (no máximo 200 palavras): nota estimada na escala das instruções fixas (se não houver, de 0 a 10), deixando claro que é estimativa; um tópico curto por critério; o que faltou para subir uma faixa; e um esboço de resposta nota máxima em até 4 tópicos.`);
   });
 }
 
@@ -2044,7 +1998,9 @@ function afterSourcesChanged() { if (view === "fontes") renderFontes(); if (shee
 /* ---- Atribuição automática: galáxia › planeta › orbe ---- */
 const discById = (id) => store.list.find((d) => d.id === id);
 function universeForAI() {
-  return store.list.map((d) => `MATÉRIA ${d.id}: ${d.subject}\n` + (d.themes.length ? d.themes.map((t) => `  TEMA ${t.id}: ${t.name}${t.desc ? " — " + t.desc : ""}\n` + t.subs.map((x) => `    ORBE ${x.id}: ${x.name}`).join("\n")).join("\n") : "  (ainda sem temas)")).join("\n\n");
+  const real = store.list.filter((d) => !isGhost(d));
+  if (!real.length) return "(o universo ainda está vazio: nenhuma matéria criada. Use \"nova\" com o nome da matéria e \"novo_tema\".)";
+  return real.map((d) => `MATÉRIA ${d.id}: ${d.subject}\n` + (d.themes.length ? d.themes.map((t) => `  TEMA ${t.id}: ${t.name}${t.desc ? " — " + t.desc : ""}\n` + t.subs.map((x) => `    ORBE ${x.id}: ${x.name}`).join("\n")).join("\n") : "  (ainda sem temas)")).join("\n\n");
 }
 function placeLabel(s, d) {
   d = d || store.list.find((x) => x.sources.includes(s)) || state;
@@ -2074,6 +2030,7 @@ function applyAssignment(s, raw, from) {
   const m = raw.materia || {};
   let to = discById(String(m.id || "")) || null;
   if (!to && m.nova && String(m.nova).trim()) { to = blankDiscipline(String(m.nova).trim().slice(0, 60)); to.auto = true; store.list.push(to); }
+  if (!to && from.placeholder) { to = blankDiscipline(String((nt => nt && nt.nome)(raw.novo_tema) || raw.titulo || "Minha matéria").slice(0, 60)); to.auto = true; store.list.push(to); }
   if (!to) to = from;
   const themeIds = [], subIds = [];
   arr(raw.temas).forEach((x) => {
@@ -2125,6 +2082,7 @@ ${(s.text || "").slice(0, 40000)}`, opts.wait || `Resumindo "${s.title}" e encon
   s.processed = true;
   if (assign) {
     const to = applyAssignment(s, raw, from);
+    if (to !== from && from.placeholder && from === state) { state = to; store.activeId = to.id; pos.clear(); persistLocal(); renderHeader(); }
     if (to === state || from === state) { if (W) { buildMap(); applyView(); } }
     return { to, label: placeLabel(s, to), moved: to !== from };
   }
@@ -2787,7 +2745,7 @@ $$(".modal").forEach((m) => {
 });
 
 function renderSettings() {
-  $("#dList").innerHTML = store.list.map((d) => `<div class="ditem ${d.id === state.id ? "on" : ""}"><span>${esc(d.subject)}${d.isExample ? ' <span class="badge">exemplo</span>' : ""}</span>
+  $("#dList").innerHTML = store.list.filter((d) => !isGhost(d) || d === state).map((d) => `<div class="ditem ${d.id === state.id ? "on" : ""}"><span>${esc(d.subject)}${d.isExample ? ' <span class="badge">exemplo</span>' : ""}</span>
     <span class="row">${d.id !== state.id ? `<button type="button" class="btn small" data-use="${d.id}">Abrir</button>` : `<span class="note">ativa</span>`}${store.list.length > 1 ? `<button type="button" class="btn small ghost" data-rmd="${d.id}">Excluir</button>` : ""}</span></div>`).join("");
   $$("[data-use]", $("#dList")).forEach((b) => b.addEventListener("click", () => { setActive(b.dataset.use); renderSettings(); }));
   $$("[data-rmd]", $("#dList")).forEach((b) => b.addEventListener("click", () => {
@@ -2800,7 +2758,7 @@ function renderSettings() {
   matCount();
   $("#lang").value = lang;
   const ex = $("#setExample");
-  ex.hidden = state.id !== "exemplo" || state.isExample;
+  ex.hidden = true;
   ex.textContent = "Restaurar mapa de exemplo";
   syncAi($("#setModal"));
 }
@@ -2811,7 +2769,7 @@ $("#gearBtn").addEventListener("click", () => { const em = window.orbitaAccount 
 $("#discBtn").addEventListener("click", () => { renderSettings(); $("#dStatus").textContent = ""; openModal($("#setModal")); });
 $("#dNew").addEventListener("click", () => { const d = blankDiscipline("Nova disciplina"); store.list.push(d); setActive(d.id); renderSettings(); $("#dName").focus(); $("#dName").select(); });
 $("#dSave").addEventListener("click", () => {
-  state.subject = $("#dName").value.trim() || "Sem nome";
+  state.subject = $("#dName").value.trim() || "Sem nome"; delete state.placeholder;
   state.instructions = $("#dInstr").value.trim();
   state.material = $("#dMat").value.slice(0, 60000);
   lang = $("#lang").value; try { localStorage.setItem(KEY + "-lang", lang); } catch (e) {}
@@ -2840,6 +2798,9 @@ function openGen() {
   openModal($("#genModal")); genText.focus();
 }
 $("#emptyGen").addEventListener("click", openGen);
+$("#ceAdd").addEventListener("click", () => { location.hash = "#fontes"; setTimeout(openAdd, 60); });
+$("#ceLive").addEventListener("click", () => openLive());
+$("#ceNew").addEventListener("click", () => newGalaxy());
 $("#setGen").addEventListener("click", openGen);
 $("#genFile").addEventListener("change", async (e) => {
   const files = [...(e.target.files || [])]; e.target.value = ""; if (!files.length) return;
@@ -2872,7 +2833,7 @@ genRun.addEventListener("click", async () => {
   const text = genText.value.trim();
   if (text.length < 80) { genStatus.textContent = "Cole um pouco mais de material (pelo menos um parágrafo)."; return; }
   genRun.disabled = true; genConfirm.innerHTML = "";
-  const raw = await runJSON(genStatus, `Você organiza material de um curso universitário de psicologia comportamental num mapa de estudo em camadas. Disciplina: ${state.subject}.${state.instructions ? " Instruções da estudante: " + state.instructions : ""}
+  const raw = await runJSON(genStatus, `Você organiza material de estudo num mapa em camadas. Disciplina: ${state.subject}.${state.instructions ? " Instruções da estudante: " + state.instructions : ""}
 Identifique entre 4 e 9 TEMAS macro (os grandes assuntos que atravessam o conteúdo, não as semanas). Para cada tema, 2 a 6 subtópicos com nomes curtos (até 4 palavras) e, para cada subtópico, as fontes do material que o alimentam. Use apenas fontes que aparecem no material. Estime o volume de conteúdo em horas. Indique conexões entre temas: "pré-requisito" (de → para), "relacionado" ou "contraste", com força de 1 a 3; só as conexões que realmente importam.
 Escreva nomes e descrições ${lang === "en" ? "em inglês" : "em português do Brasil"}; descrição em uma frase curta.
 Responda apenas com JSON: {"temas":[{"id":"slug-curto","nome":"...","descricao":"uma frase","volume_horas":4,"subtopicos":[{"nome":"...","fontes":[{"tipo":"leitura|aula|artigo|outro","titulo":"..."}]}]}],"conexoes":[{"de":"slug","para":"slug","tipo":"pré-requisito|relacionado|contraste","forca":2}]}
