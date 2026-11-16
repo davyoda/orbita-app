@@ -16,7 +16,8 @@ jobs:
         with: { node-version: 20 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 21 }
-      - uses: android-actions/setup-android@v3
+      - name: Conferir ferramentas do Android (já vêm no servidor do GitHub)
+        run: echo "ANDROID_HOME=$ANDROID_HOME" && ls "$ANDROID_HOME"
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Preparar o projeto Android
