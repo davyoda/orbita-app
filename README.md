@@ -32,22 +32,19 @@ Para trocar o modelo, crie esses segredos no Supabase (Edge Functions → Secret
   - a **senha do banco**, criada junto com o projeto. Se esqueceu, troque em Database → Settings.
 - Crie um token de acesso em https://supabase.com/dashboard/account/tokens.
 
-### 2. Segredos no GitHub
-No repositório, vá em **Settings → Secrets and variables → Actions → New repository secret** e crie:
+### 2. Segredos das funções (no Supabase)
+No painel do Supabase, vá em **Edge Functions → Secrets → Add new secret** e crie:
 
 | Nome | Valor |
 |---|---|
-| `SUPABASE_ACCESS_TOKEN` | o token do passo 1 |
-| `SUPABASE_PROJECT_REF` | o código do projeto |
-| `SUPABASE_DB_PASSWORD` | a senha do banco |
 | `ANTHROPIC_API_KEY` | a chave gerada em platform.claude.com → API keys |
 | `GROQ_API_KEY` | a chave gerada em console.groq.com → API Keys |
 | `ALLOWED_EMAILS` | os e-mails que podem usar o Claude, separados por vírgula |
 
-Só os e-mails de `ALLOWED_EMAILS` gastam créditos da API. Qualquer outra pessoa que crie uma conta só vê um espaço vazio, sem IA.
+Sem `ALLOWED_EMAILS`, ninguém usa o Claude. Quem cria uma conta sem estar na lista só vê um espaço vazio, sem IA.
 
-### 3. Publicar o servidor
-Em **Actions → Servidor (Supabase) → Run workflow**. Depois disso, ele roda sozinho sempre que algo em `supabase/` mudar.
+### 3. Servidor
+A tabela e as funções `claude` e `transcribe` já foram publicadas pelo Claude, pelo conector do Supabase. Para republicar pelo GitHub, use **Actions → Servidor (Supabase) → Run workflow**. Isso exige os segredos `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` e `SUPABASE_DB_PASSWORD` no GitHub.
 
 ### 4. Publicar o site
 Em https://vercel.com → **Add New → Project**:
