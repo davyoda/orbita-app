@@ -1,0 +1,7 @@
+{
+  "appId": "app.orbita.estudos",
+  "appName": "Órbita",
+  "webDir": "web",
+  "backgroundColor": "#070A14",
+  "android": { "allowMixedContent": false }
+}

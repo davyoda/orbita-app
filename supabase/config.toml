@@ -1,0 +1,8 @@
+# Configuração mínima usada pelo deploy (GitHub Actions).
+project_id = "orbita-app"
+
+[functions.claude]
+verify_jwt = true
+
+[functions.transcribe]
+verify_jwt = true

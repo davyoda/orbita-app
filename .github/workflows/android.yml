@@ -1,0 +1,37 @@
+# Gera o APK do Órbita a cada mudança no app e publica na aba Releases do GitHub.
+name: APK Android
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "capacitor.config.json", "package.json", "assets/**", "scripts/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - uses: android-actions/setup-android@v3
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Preparar o projeto Android
+        env: { VERSION_CODE: "${{ github.run_number }}" }
+        run: npm run android:prepare
+      - name: Montar o APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Renomear
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "orbita-1.0.${{ github.run_number }}.apk"
+      - name: Publicar na aba Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "Órbita 1.0.${{ github.run_number }}"
+          body: "APK gerado automaticamente. Baixe o arquivo .apk abaixo no celular Android e abra para instalar."
+          files: "orbita-1.0.${{ github.run_number }}.apk"
+          make_latest: true

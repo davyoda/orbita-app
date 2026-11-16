@@ -1,0 +1,43 @@
+# Publica o servidor do Órbita no Supabase: tabela, regras de acesso, funções e segredos.
+# Roda sozinho quando algo em supabase/ muda, ou manualmente pela aba Actions.
+name: Servidor (Supabase)
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/**", ".github/workflows/supabase.yml"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - name: Conferir segredos
+        run: |
+          for v in SUPABASE_ACCESS_TOKEN PROJECT_REF SUPABASE_DB_PASSWORD; do
+            if [ -z "${!v}" ]; then echo "::error::Falta o segredo $v (Settings > Secrets and variables > Actions)"; exit 1; fi
+          done
+      - name: Ligar ao projeto
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: Criar ou atualizar a base
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --include-all
+      - name: Guardar segredos das funções
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}
+        run: |
+          args=()
+          [ -n "$ANTHROPIC_API_KEY" ] && args+=("ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY")
+          [ -n "$GROQ_API_KEY" ] && args+=("GROQ_API_KEY=$GROQ_API_KEY")
+          [ -n "$ALLOWED_EMAILS" ] && args+=("ALLOWED_EMAILS=$ALLOWED_EMAILS")
+          if [ ${#args[@]} -gt 0 ]; then supabase secrets set --project-ref "$PROJECT_REF" "${args[@]}"; fi
+      - name: Publicar funções
+        run: |
+          supabase functions deploy claude --project-ref "$PROJECT_REF"
+          supabase functions deploy transcribe --project-ref "$PROJECT_REF"
