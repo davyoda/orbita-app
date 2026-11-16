@@ -30,7 +30,8 @@ export async function authorize(req: Request): Promise<string | Response> {
   const user = await r.json().catch(() => null);
   const email = String(user?.email || "").toLowerCase();
   if (!email) return fail("session_expired", "Sua sessão expirou. Entre de novo.", 401);
-  if (allowed.length && !allowed.includes(email)) {
+  // Sem lista configurada, ninguém usa (protege os créditos da API).
+  if (!allowed.includes(email)) {
     return fail("not_granted", "Esta conta ainda não está liberada para usar o Claude. Peça ao administrador do Órbita.", 403);
   }
   return email;

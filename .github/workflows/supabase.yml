@@ -1,10 +1,9 @@
 # Publica o servidor do Órbita no Supabase: tabela, regras de acesso, funções e segredos.
 # Roda sozinho quando algo em supabase/ muda, ou manualmente pela aba Actions.
 name: Servidor (Supabase)
+# Opcional: as funções já foram publicadas pelo Claude via conector do Supabase.
+# Rode manualmente (aba Actions) se quiser republicar pelo GitHub; exige os segredos abaixo.
 on:
-  push:
-    branches: [main]
-    paths: ["supabase/**", ".github/workflows/supabase.yml"]
   workflow_dispatch:
 jobs:
   deploy:
@@ -39,5 +38,5 @@ jobs:
           if [ ${#args[@]} -gt 0 ]; then supabase secrets set --project-ref "$PROJECT_REF" "${args[@]}"; fi
       - name: Publicar funções
         run: |
-          supabase functions deploy claude --project-ref "$PROJECT_REF"
-          supabase functions deploy transcribe --project-ref "$PROJECT_REF"
+          supabase functions deploy claude --project-ref "$PROJECT_REF" --use-api
+          supabase functions deploy transcribe --project-ref "$PROJECT_REF" --use-api

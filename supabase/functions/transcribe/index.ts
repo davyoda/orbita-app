@@ -1,5 +1,5 @@
 // Órbita · transcrição de áudio com o Whisper (via Groq, plano gratuito).
-import { authorize, cors, fail, json } from "../_shared/mod.ts";
+import { authorize, cors, fail, json } from "./shared.ts";
 
 const KEY = Deno.env.get("GROQ_API_KEY") || "";
 const MODEL = Deno.env.get("TRANSCRIBE_MODEL") || "whisper-large-v3-turbo";

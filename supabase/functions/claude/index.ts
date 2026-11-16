@@ -1,7 +1,7 @@
 // Órbita · ponte com a API do Claude.
 // A chave fica só aqui no servidor. O app escolhe um "nível" (quick/default/complex);
 // o modelo de cada nível é definido aqui e pode ser trocado sem atualizar o app.
-import { authorize, cors, fail, json } from "../_shared/mod.ts";
+import { authorize, cors, fail, json } from "./shared.ts";
 
 const KEY = Deno.env.get("ANTHROPIC_API_KEY") || "";
 const MODELS: Record<string, string> = {
